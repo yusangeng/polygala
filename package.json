@@ -1,0 +1,34 @@
+{
+  "name": "atask",
+  "version": "0.1.0",
+  "description": "Async task implemention in browser.",
+  "main": "lib/index.js",
+  "scripts": {
+    "transpile": "./node_modules/.bin/babel ./src -d ./lib --source-maps inline",
+    "prepublish": "npm run transpile"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yusangeng/atask.git"
+  },
+  "keywords": [
+    "async",
+    "task"
+  ],
+  "author": {
+    "name": "yusangeng",
+    "email": "yusangeng@outlook.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yusangeng/atask/issues"
+  },
+  "homepage": "https://github.com/yusangeng/atask#readme",
+  "dependencies": {
+    "setimmediate": "^1.0.5"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1"
+  }
+}

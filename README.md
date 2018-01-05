@@ -1,15 +1,17 @@
-# atask | Async task implemention in browser.
+# polygala
+
+Async task implemention in browser.
 
 ## Install
 
 ```shell
-npm install atask --save
+npm install polygala --save
 ```
 
 ## Usage
 
 ``` js
-import {microTask, macroTask} from 'atask'
+import {microTask, macroTask} from 'polygala'
 
 const task1 = macroTask(_ => console.log('task1'))
 const task2 = microTask(_ => console.log('task2'))

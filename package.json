@@ -1,11 +1,13 @@
 {
   "name": "polygala",
-  "version": "0.1.0",
-  "description": "Async task implemention in browser.",
+  "version": "1.0.0",
+  "description": "Tools for writing async function in browser.",
   "main": "lib/index.js",
   "scripts": {
+    "test": "babel-node node_modules/.bin/isparta cover node_modules/.bin/_mocha",
+    "test-win": "mocha --compilers babel-core/register",
     "transpile": "./node_modules/.bin/babel ./src -d ./lib --source-maps inline",
-    "prepublish": "npm run transpile"
+    "prepublish": "npm test && npm run transpile"
   },
   "repository": {
     "type": "git",
@@ -30,6 +32,10 @@
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.6.1"
+    "babel-preset-env": "^1.6.1",
+    "chai": "^4.1.0",
+    "isparta": "^4.0.0",
+    "istanbul": "0.4.4",
+    "mocha": "^3.5.0"
   }
 }

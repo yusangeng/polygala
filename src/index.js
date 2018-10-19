@@ -1,5 +1,5 @@
 import { microTask, macroTask } from './browserTask'
-import fifo from './FIFO'
+import fifo from './fifo'
 import Polling, { startPolling, PollingBase } from './Polling'
 import Quittable, { QuittableBase } from './Quittable'
 
@@ -26,4 +26,3 @@ const polygala = {
 }
 
 export default polygala
-

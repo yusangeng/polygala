@@ -4,7 +4,7 @@
  * @author Y3G
  */
 
-import isSetTimeout from './isSetTimeout'
+import isSetTimeout from './isTimeout'
 
 export function microTask (fn) {
   return (...params) => setImmediate(_ => fn(...params))

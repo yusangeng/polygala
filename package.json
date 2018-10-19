@@ -1,6 +1,6 @@
 {
   "name": "polygala",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Tools for writing async function in browser.",
   "main": "lib/index.js",
   "scripts": {

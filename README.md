@@ -10,6 +10,18 @@ npm install polygala --save
 
 ## Usage
 
+### sleep
+
+Async sleep.
+
+``` js
+import {sleep} from 'polygala'
+
+async function main () {
+  await sleep(1000)
+}
+```
+
 ### browserTask
 
 Micro/Macro task in browser.

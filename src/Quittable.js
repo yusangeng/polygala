@@ -37,7 +37,7 @@ export class QuittableBase {
     this.quitted_ = false
     this.quitPrev_ = quitPrev
 
-    if (this.hasName && !quitPrev) {
+    if (!this.hasName && quitPrev) {
       console.warn(`A quittable object without a name should NOT be setted by 'quitPrev'.`)
     }
   }
@@ -70,15 +70,26 @@ export class QuittableBase {
 
   _beforeRun () {
     this.used_ = true
+    const { hasName, name, quitPrev_ } = this
 
-    if (this.hasName && this.quitPrev_) {
+    if (hasName && quitPrev_) {
       this._quitPrev()
+    }
+
+    if (hasName) {
+      namedQuittableMap[name] = this
     }
   }
 
   _afterRun () {
-    if (this.hasName && namedQuittableMap[this.name]) {
-      delete namedQuittableMap[this.name]
+    if (this.hasName) {
+      return
+    }
+
+    const { name } = this
+
+    if (namedQuittableMap[name]) {
+      delete namedQuittableMap[name]
     }
   }
 

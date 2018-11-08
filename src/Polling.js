@@ -95,7 +95,7 @@ export class PollingBase {
         await this.fn_(this)
         this.count_++
       } catch (err) {
-        const shouldStop = this.onError(err)
+        const shouldStop = this.onError_(err)
         if (shouldStop) {
           this.stop()
         }

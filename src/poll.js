@@ -80,15 +80,15 @@ export class Polling {
 
   async _onTimeout () {
     try {
-      await this.fn_(this)
       this.count_++
+      await this.fn_(this)
     } catch (err) {
       const shouldStop = this.onError_(err)
       if (shouldStop) {
         this.stop()
       }
     } finally {
-      this._setTimer()
+      this._nextTimer()
     }
   }
 }

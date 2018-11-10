@@ -38,6 +38,10 @@ export class Quittable {
 
     this._beforeRun()
 
+    if (this.quitted) {
+      return
+    }
+
     let ret
 
     try {
@@ -45,6 +49,8 @@ export class Quittable {
     } catch (err) {
       if (!this.quitted) {
         throw err
+      } else {
+        console.error(err)
       }
     } finally {
       this._afterRun()

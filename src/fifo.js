@@ -5,7 +5,7 @@
  */
 
 const PENDING = 'Pending'
-const WAITTING = 'WaittingPrev'
+const WAITTING = 'Waitting'
 
 class FIFO {
   get queue () {
@@ -21,7 +21,7 @@ class FIFO {
     const self = this
     const id = this.currId_++
 
-    const retFn = async function fifoFn (...params) {
+    const retFn = function fifoFn (...params) {
       return new Promise(async (resolve, reject) => {
         let ret
 
@@ -36,7 +36,7 @@ class FIFO {
       })
     }
 
-    retFn.__fifo_id__ = id // for debug
+    // retFn.__fifo_id__ = id // for debug
     this.queue.push({ id, status: PENDING })
 
     return retFn
@@ -44,13 +44,7 @@ class FIFO {
 
   _handleResult (id, callback) {
     const { queue } = this
-    const index = queue.findIndex(el => el.id === id)
-
-    if (index < 0) {
-      throw new Error(`Bad id: ${id}.`)
-    }
-
-    const item = queue[index]
+    const item = queue.find(el => el.id === id)
 
     item.status = WAITTING
     item.callback = callback
@@ -68,6 +62,7 @@ class FIFO {
       if (status === PENDING) {
         break
       } else if (status === WAITTING) {
+        // console.log(`WAITTING: ${item.id}`)
         callback()
         queue.shift()
       }

@@ -2,6 +2,10 @@
 
 Some utils for writing asynchronous code in browser.
 
+[![Build Status](https://travis-ci.org/yusangeng/polygala.svg?branch=master)](https://travis-ci.org/yusangeng/pano.gl) [![Standard - JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+
+[![Npm Info](https://nodei.co/npm/polygala.png?compact=true)](https://www.npmjs.com/package/polygala)
+
 ## Install
 
 ```shell

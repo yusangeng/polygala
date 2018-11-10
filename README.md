@@ -1,6 +1,6 @@
 # polygala
 
-Tools for writing async function in browser.
+Some utils for writing asynchronous code in browser.
 
 ## Install
 
@@ -12,10 +12,10 @@ npm install polygala --save
 
 ### sleep
 
-Async sleep.
+Asynchronous sleep.
 
 ``` js
-import {sleep} from 'polygala'
+import { sleep } from 'polygala'
 
 async function main () {
   await sleep(1000)
@@ -27,15 +27,15 @@ async function main () {
 Micro/Macro task in browser.
 
 ``` js
-import {microTask, macroTask} from 'polygala'
+import { microTask, macroTask } from 'polygala'
 
 const task1 = macroTask(_ => console.log('task1'))
 const task2 = microTask(_ => console.log('task2'))
 
-// print 'task2', 'task1'
 task1()
 task2()
 
+//=> Prints 'task2', 'task1'
 ```
 
 ### fifo
@@ -43,74 +43,93 @@ task2()
 FIFO function queue.
 
 ``` js
-import { fifo } from 'polygala'
+import { fifo, sleep } from 'polygala'
 
 async function fa() {
   // 2s delay
+  await sleep(2000)
 }
 
 async function fb() {
   // 1s delay
+  await sleep(1000)
 }
 
-const a = fifo(fa)
-const b = fifo(fb)
+const a = fifo(fa, 'foobar')
+const b = fifo(fb, 'foobar')
 
 let str = ''
 
-a().then(_ => {
-  str += 'Hello'
-})
-b().then(_ => {
-  str += 'World'
-  console.log(str)
-})
+a().then(_ => { str += 'Hello' })
+b().then(_ => { str += 'World' })
+
+//=> str === 'Hello World'
 ```
 
-### Polling
+### poll
 
 An easy-to-use polling implemention.
 
 ``` js
-import { Polling } from 'polygala'
+import { poll } from 'polygala'
+import ajax from './ajax'
 
-class MyPolling extends Polling {
-  async exec() {
-    // ...
+const stop = poll(async polling => {
+  const { url } = polling.context
+  await ajax.get(url)
+}, {
+  delay: 3000,
+  limit: 1000, // Repeats at most 1000 times, 0 means NO limit.
+  context: {
+    url: '//foobar.com/heartbeat'
+  },
+  onError: err => {
+    console.error(err)
+    return false // False means "Don't stop polling", if you want to stop, return true.
   }
-}
-
-const pl = new Polling()
-pl.start()
+})
 
 // ...
 
-pl.stop()
+stop() // stop polling.
 ```
 
-### Quittable
+### quittable
 
-Quittable async task.
+Quittable asynchronous task.
 
 ``` js
-import { Quittable } from 'polygala'
+import { quittable, sleep } from 'polygala'
+import ajax from './ajax'
+import store from './store'
 
-class MyQuittable extends Quittable {
-  async exec() {
-    // ...
+const task = quittable(async task => {
+  await sleep(1000)
+
+  if (task.quitted) {
+    // Task has been quitted.
+    return
   }
 
-  onError () {
-    return false // false means do NOT stop polling on error.
+  const { url } = task.context
+  const data = await ajax.get(url)
+
+  if (task.quitted) {
+    return
   }
-}
 
-const q = new MyQuittable()
-q.start()
+  store.data = data
+},
+// Name of quittable task, null means on name. A named task would be quitted if a new task with the same name was run.
+'foobar',
+// context
+{
+  url: '//foobar.com/heartbeat'
+})
 
-// ...
+task.run()
 
-q.quit()
+setTimeout(_ => {
+  task.quit()
+}, 1050)
 ```
-
-

@@ -4,21 +4,15 @@
  * @author Y3G
  */
 
-const noop = _ => _
-
 const namedQuittableMap = {}
 
-export class QuittableBase {
+export class Quittable {
   get context () {
     return this.context_
   }
 
   get name () {
     return this.name_
-  }
-
-  get hasName () {
-    return !!(this.name && this.name.length)
   }
 
   get used () {
@@ -29,22 +23,17 @@ export class QuittableBase {
     return this.quitted_
   }
 
-  constructor (fn, { context = {}, name = '', quitPrev = false }) {
+  constructor (fn, { context = {}, name = null }) {
     this.fn_ = fn
     this.context_ = context
     this.name_ = name
     this.used_ = false
     this.quitted_ = false
-    this.quitPrev_ = quitPrev
-
-    if (!this.hasName && quitPrev) {
-      console.warn(`A quittable object without a name should NOT be setted by 'quitPrev'.`)
-    }
   }
 
   async run () {
     if (this.used) {
-      throw new Error(`Quitable object should NOT be executed repeatly.`)
+      throw new Error(`Quittable object should NOT be executed repeatly.`)
     }
 
     this._beforeRun()
@@ -57,9 +46,9 @@ export class QuittableBase {
       if (!this.quitted) {
         throw err
       }
+    } finally {
+      this._afterRun()
     }
-
-    this._afterRun()
 
     return ret
   }
@@ -70,25 +59,22 @@ export class QuittableBase {
 
   _beforeRun () {
     this.used_ = true
-    const { hasName, name, quitPrev_ } = this
+    const { name } = this
 
-    if (hasName && quitPrev_) {
+    if (name) {
       this._quitPrev()
-    }
-
-    if (hasName) {
       namedQuittableMap[name] = this
     }
   }
 
   _afterRun () {
-    if (this.hasName) {
+    const { name } = this
+
+    if (!name) {
       return
     }
 
-    const { name } = this
-
-    if (namedQuittableMap[name]) {
+    if (namedQuittableMap[name] === this) {
       delete namedQuittableMap[name]
     }
   }
@@ -99,20 +85,13 @@ export class QuittableBase {
 
     if (prev) {
       prev.quit()
+      delete namedQuittableMap[name]
     }
-
-    delete namedQuittableMap[name]
   }
 }
 
-export default class Quittable extends QuittableBase {
-  constructor (options = {}) {
-    super(noop, options)
-
-    this.fn_ = this.exec.bind(this)
-  }
-
-  async exec () {
-    throw new Error(`Method exec should be overriden by subclass.`)
-  }
+export function quittable (fn, name, context) {
+  return new Quittable(fn, { name, context })
 }
+
+export default quittable

@@ -2,6 +2,8 @@
 
 Toolset about time & timing.
 
+关于时间与"时机"的工具集.
+
 [![Build Status](https://travis-ci.org/yusangeng/polygala.svg?branch=master)](https://travis-ci.org/yusangeng/pano.gl) [![Standard - JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
 [![Npm Info](https://nodei.co/npm/polygala.png?compact=true)](https://www.npmjs.com/package/polygala)

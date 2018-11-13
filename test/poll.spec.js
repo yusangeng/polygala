@@ -2,12 +2,20 @@
 
 import 'babel-polyfill'
 import chai from 'chai'
-import poll from '../src/poll'
+import poll, { Polling } from '../src/poll'
 
 chai.should()
 
 describe('poll', _ => {
   describe('#poll', _ => {
+    it('should return a stop function', done => {
+      const stop = poll()
+      const str = Object.prototype.toString.call(stop)
+
+      str.should.be.equal('[object Function]')
+      done()
+    })
+
     it('should have right context', done => {
       let i = 0
 
@@ -126,6 +134,40 @@ describe('poll', _ => {
         i.should.be.equal(3)
         done()
       }, 500)
+    })
+
+    it('new Polling', done => {
+      let i = 0
+
+      const p = new Polling(_ => {
+        i = 1
+      }, {
+        delay: 100,
+        limit: 100,
+        onError: err => true
+      })
+
+      p.start()
+
+      setTimeout(_ => {
+        i.should.be.eq(1)
+        done()
+      })
+    })
+
+    it('should do nothing if stopped before start', done => {
+      let i = 0
+
+      const p = new Polling(_ => {
+        i = 1
+      }, {
+        delay: 100,
+        limit: 100,
+        onError: err => true
+      })
+
+      p.stop()
+      done()
     })
   })
 })

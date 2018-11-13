@@ -1,22 +1,28 @@
 import sleep from './sleep'
-import { microTask, macroTask } from './browserTask'
+import { micro, macro, microTask, macroTask } from './task'
 import fifo from './fifo'
 import poll from './poll'
 import quittable from './quittable'
 
 export {
-  sleep,
+  micro,
   microTask,
+  macro,
   macroTask,
+  sleep,
   fifo,
-  poll
+  poll,
+  quittable
 }
 
 const polygala = {
-  sleep,
+  micro,
   microTask,
+  macro,
   macroTask,
+  sleep,
   fifo,
+  poll,
   quittable
 }
 

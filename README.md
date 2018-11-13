@@ -1,6 +1,6 @@
 # polygala
 
-Some utils for writing asynchronous code in browser.
+Toolset about time & timing.
 
 [![Build Status](https://travis-ci.org/yusangeng/polygala.svg?branch=master)](https://travis-ci.org/yusangeng/pano.gl) [![Standard - JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
@@ -31,10 +31,10 @@ async function main () {
 Micro/Macro task in browser.
 
 ``` js
-import { microTask, macroTask } from 'polygala'
+import { micro, macro } from 'polygala'
 
-const task1 = macroTask(_ => console.log('task1'))
-const task2 = microTask(_ => console.log('task2'))
+const task1 = macro(_ => console.log('task1'))
+const task2 = micro(_ => console.log('task2'))
 
 task1()
 task2()

@@ -1,7 +1,7 @@
 {
   "name": "polygala",
-  "version": "2.0.1",
-  "description": "Tools for writing async function in browser.",
+  "version": "2.1.0",
+  "description": "Toolset about time & timing.",
   "main": "lib/index.js",
   "scripts": {
     "test": "babel-node node_modules/.bin/isparta cover node_modules/.bin/_mocha",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yusangeng/atask.git"
+    "url": "git+https://github.com/yusangeng/polygala.git"
   },
   "keywords": [
     "asynchronous",
@@ -24,11 +24,11 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/yusangeng/atask/issues"
+    "url": "https://github.com/yusangeng/polygala/issues"
   },
-  "homepage": "https://github.com/yusangeng/atask#readme",
+  "homepage": "https://github.com/yusangeng/polygala#readme",
   "dependencies": {
-    "setimmediate": "^1.0.5"
+    "immediate": "^3.2.3"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

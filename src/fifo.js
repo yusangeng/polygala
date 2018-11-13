@@ -61,7 +61,7 @@ class FIFO {
 
       if (status === PENDING) {
         break
-      } else if (status === WAITTING) {
+      } else {
         // console.log(`WAITTING: ${item.id}`)
         callback()
         queue.shift()

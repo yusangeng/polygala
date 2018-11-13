@@ -64,8 +64,8 @@ describe('fifo', _ => {
         })
       }
 
-      const fifoA = fifo(a)
-      const fifoB = fifo(b)
+      const fifoA = fifo(a, 'foobar')
+      const fifoB = fifo(b, 'foobar')
 
       fifoA().catch(err => {
         console.error(`error: ${err.message}`)

@@ -1,42 +1,40 @@
-# polygala
+# polygala | TS library about time & timing
 
-Toolset about time & timing.
+[![TypeScript](https://img.shields.io/badge/lang-typescript-blue.svg)](https://www.tslang.cn/) [![Build Status](https://travis-ci.org/yusangeng/polygala.svg?branch=master)](https://travis-ci.org/yusangeng/polygala) [![Coverage Status](https://coveralls.io/repos/github/yusangeng/polygala/badge.svg?branch=master)](https://coveralls.io/github/yusangeng/polygala?branch=master) [![Npm Package Info](https://badge.fury.io/js/polygala.svg)](https://www.npmjs.com/package/polygala) [![Downloads](https://img.shields.io/npm/dw/polygala.svg?style=flat)](https://www.npmjs.com/package/polygala)
+
+## 综述 | Abstract
 
 关于时间与"时机"的工具集.
 
-[![Build Status](https://travis-ci.org/yusangeng/polygala.svg?branch=master)](https://travis-ci.org/yusangeng/pano.gl) [![Standard - JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+## 安装 | Install
 
-[![Npm Info](https://nodei.co/npm/polygala.png?compact=true)](https://www.npmjs.com/package/polygala)
-
-## Install
-
-```shell
+``` bash
 npm install polygala --save
 ```
 
-## Usage
+## 使用 | Usage
 
 ### sleep
 
 Asynchronous sleep.
 
-``` js
+``` ts
 import { sleep } from 'polygala'
 
-async function main () {
+async function main () : Promise<void> {
   await sleep(1000)
 }
 ```
 
-### browserTask
+### task
 
-Micro/Macro task in browser.
+Simulative micro/macro task in browser.
 
-``` js
+``` ts
 import { micro, macro } from 'polygala'
 
-const task1 = macro(_ => console.log('task1'))
-const task2 = micro(_ => console.log('task2'))
+const task1 = macro(() => console.log('task1'))
+const task2 = micro(() => console.log('task2'))
 
 task1()
 task2()
@@ -46,28 +44,30 @@ task2()
 
 ### fifo
 
-FIFO function queue.
+FIFO promise queue.
 
-``` js
+``` ts
 import { fifo, sleep } from 'polygala'
 
-async function fa() {
+async function fa() : Promise<void> {
   // 2s delay
   await sleep(2000)
 }
 
-async function fb() {
+async function fb() : Promise<void> {
   // 1s delay
   await sleep(1000)
 }
 
-const a = fifo(fa, 'foobar')
-const b = fifo(fb, 'foobar')
+const globalFIFOName = Symbol('foobar')
+
+const a = fifo(fa, globalFIFOName)
+const b = fifo(fb, globalFIFOName)
 
 let str = ''
 
-a().then(_ => { str += 'Hello' })
-b().then(_ => { str += 'World' })
+a().then(() => { str += 'Hello' })
+b().then(() => { str += 'World' })
 
 //=> str === 'Hello World'
 ```
@@ -76,13 +76,12 @@ b().then(_ => { str += 'World' })
 
 An easy-to-use polling implemention.
 
-``` js
+``` ts
 import { poll } from 'polygala'
-import ajax from './ajax'
 
 const stop = poll(async polling => {
   const { url } = polling.context
-  await ajax.get(url)
+  await fetch(url)
 }, {
   delay: 3000,
   limit: 1000, // Repeats at most 1000 times, 0 means NO limit.
@@ -104,7 +103,7 @@ stop() // stop polling.
 
 Quittable asynchronous task.
 
-``` js
+``` ts
 import { quittable, sleep } from 'polygala'
 import ajax from './ajax'
 import store from './store'
@@ -138,4 +137,102 @@ task.run()
 setTimeout(_ => {
   task.quit()
 }, 1050)
+```
+
+## API
+
+### sleep
+
+Sleep Asynchronously.
+
+``` ts
+function sleep (milliseconds: number) : Promise<void>
+```
+
+### micro & macro
+
+Invoke simulative micro/macro tasks in browser.
+
+``` ts
+type FProcedure = (...args: any[]) => void
+
+function micro<Fn extends FProcedure> (fn: Fn) : Fn
+function macro<Fn extends FProcedure> (fn: Fn) : Fn
+```
+
+### fifo
+
+Push an async function and its return value into a FIFO promise queue.
+
+``` ts
+type AsyncFunc<RetType> = (...args: any[]) => Promise<RetType>
+
+export function fifo<Fn extends AsyncFunc<void>> (fn : Fn, queueName?: symbol) : Fn
+export function fifo<RetType, Fn extends AsyncFunc<RetType>> (fn : Fn, queueName?: symbol) : Fn
+```
+
+### pool
+
+Start polling. 
+
+``` ts
+// Polling function type.
+type PollingFunc<ContextType> = (p: Polling<ContextType>) => void
+
+// Error callbacl type.
+type ErrorCallback = (error: Error) => boolean
+
+// Options type.
+type PollingOptions<ContextType> = {
+  context?: ContextType
+  delay?: number
+  limit?: number
+  onError?: ErrorCallback
+}
+
+// Function to stop polling.
+type StopFunc = () => void
+
+function poll<ContextType> (fn: PollingFunc<ContextType>, options?: PollingOptions<ContextType>) : StopFunc
+```
+
+### quittable
+
+Create a quittable asynchronous task.
+
+``` ts
+interface IQuittable<ContextType> {
+  quitted: boolean
+  readonly context: ContextType
+  quit () : void
+}
+
+type FQUITTED = () => void
+
+class Quittable<ContextType, RetType> implements IQuittable<ContextType> {
+  // ...
+
+  run () : Promise<FQUITTED | RetType>
+  quit () : void
+}
+
+type QuittableCallable<ContextType, RetType> = (q: IQuittable<ContextType>) => RetType
+
+function quittable<ContextType, RetType = void> (
+  context: ContextType,
+  fn: QuittableCallable<ContextType, RetType>) : Quittable<ContextType, RetType>
+
+```
+
+### namedQuittable
+
+Create a named quittable asynchronous task.
+
+If you've created a named quittable task, the last task with the same name was quitted automatically.
+
+``` ts
+function namedQuittable<ContextType, RetType = void> (
+  name: symbol,
+  context: ContextType,
+  fn: QuittableCallable<ContextType, RetType>) : Quittable<ContextType, RetType>
 ```

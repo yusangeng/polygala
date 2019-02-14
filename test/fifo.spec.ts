@@ -1,27 +1,26 @@
 /* global describe it */
 
-import 'babel-polyfill'
 import chai from 'chai'
 import fifo from '../src/fifo'
 
 chai.should()
 
-describe('fifo', _ => {
-  describe('#fifo', _ => {
+describe('fifo', () => {
+  describe('#fifo', () => {
     it('1st resolve', done => {
       let s = ''
 
-      async function a (arg) {
-        return new Promise((resolve, reject) => {
-          setTimeout(_ => {
+      function a (arg: number) : Promise<number> {
+        return new Promise((resolve) => {
+          setTimeout(() => {
             resolve(arg)
           }, 200)
         })
       }
 
-      async function b (arg) {
-        return new Promise((resolve, reject) => {
-          setTimeout(_ => {
+      function b (arg: number, b: string) : Promise<number> {
+        return new Promise((resolve) => {
+          setTimeout(() => {
             resolve(arg)
           }, 100)
         })
@@ -30,16 +29,17 @@ describe('fifo', _ => {
       const fifoA = fifo(a)
       const fifoB = fifo(b)
 
-      fifoA(1).then(arg => {
+      fifoA(1).then((arg: number) => {
         arg.should.be.equal(1)
         s += 'Hello'
       })
-      fifoB(2).then(arg => {
+
+      fifoB(2, '').then((arg: number) => {
         arg.should.be.equal(2)
         s += 'World'
       })
 
-      setTimeout(_ => {
+      setTimeout(() => {
         s.should.be.equal('HelloWorld')
         done()
       }, 300)
@@ -48,35 +48,37 @@ describe('fifo', _ => {
     it('1st reject', done => {
       let s = ''
 
-      async function a () {
+      function a () : Promise<void> {
         return new Promise((resolve, reject) => {
-          setTimeout(_ => {
+          setTimeout(() => {
             reject(new Error('Hi'))
           }, 200)
         })
       }
 
-      async function b () {
+      function b () : Promise<void> {
         return new Promise((resolve, reject) => {
-          setTimeout(_ => {
+          setTimeout(() => {
             resolve()
           }, 100)
         })
       }
 
-      const fifoA = fifo(a, 'foobar')
-      const fifoB = fifo(b, 'foobar')
+      const foobarName = Symbol('foobar')
 
-      fifoA().catch(err => {
+      const fifoA = fifo(a, foobarName)
+      const fifoB = fifo(b, foobarName)
+
+      fifoA().catch((err: Error) => {
         console.error(`error: ${err.message}`)
         s += err.message
       })
 
-      fifoB().then(_ => {
+      fifoB().then(() => {
         s += 'World'
       })
 
-      setTimeout(_ => {
+      setTimeout(() => {
         s.should.be.equal('HiWorld')
         done()
       }, 300)

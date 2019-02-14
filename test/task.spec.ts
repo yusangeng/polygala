@@ -1,49 +1,50 @@
 /* global describe it */
 
-import 'babel-polyfill'
 import chai from 'chai'
 import { micro, macro } from '../src/task'
 import sleep from '../src/sleep'
 
+const processAny = (process as any)
+
 chai.should()
 
-describe('task', _ => {
-  describe('#micro', _ => {
+describe('task', () => {
+  describe('#micro', () => {
     it('should exec input function', async () => {
       let i = 0
-      micro(_ => ++i)()
+      micro(() => ++i)()
       await sleep(1)
       i.should.be.equal(1)
     })
 
     it('should exec input function in browser', async () => {
-      process.browser = true
+      processAny.browser = true
       let i = 0
       try {
-        micro(_ => ++i)()
+        micro(() => ++i)()
       } finally {
-        process.browser = false
+        processAny.browser = false
       }
       await sleep(1)
       i.should.be.equal(1)
     })
   })
 
-  describe('#macro', _ => {
+  describe('#macro', () => {
     it('should exec input function', async () => {
       let i = 0
-      macro(_ => ++i)()
+      macro(() => ++i)()
       await sleep(1)
       i.should.be.equal(1)
     })
 
     it('should exec input function in browser', async () => {
-      process.browser = true
+      processAny.browser = true
       let i = 0
       try {
-        macro(_ => ++i)()
+        macro(() => ++i)()
       } finally {
-        process.browser = false
+        processAny.browser = false
       }
       await sleep(1)
       i.should.be.equal(1)
@@ -51,13 +52,13 @@ describe('task', _ => {
 
     it('should exec after micro', async () => {
       let i = ''
-      macro(_ => {
+      macro(() => {
         i += 'hello'
       })()
-      micro(_ => {
+      micro(() => {
         i += 'world'
       })()
-      micro(_ => {
+      micro(() => {
         i += '!'
       })()
       await sleep(1)
@@ -66,12 +67,12 @@ describe('task', _ => {
 
     it('should exec after micro in micro', async () => {
       let i = ''
-      macro(_ => {
+      macro(() => {
         i += 'hello'
       })()
-      micro(_ => {
+      micro(() => {
         i += 'world'
-        micro(_ => {
+        micro(() => {
           i += '!'
         })()
       })()
@@ -81,20 +82,20 @@ describe('task', _ => {
 
     it('should exec after micro in browser', async () => {
       let i = ''
-      process.browser = true
+      processAny.browser = true
 
       try {
-        macro(_ => {
+        macro(() => {
           i += 'hello'
         })()
-        micro(_ => {
+        micro(() => {
           i += 'world'
         })()
-        micro(_ => {
+        micro(() => {
           i += '!'
         })()
       } finally {
-        process.browser = false
+        processAny.browser = false
       }
 
       await sleep(1)
@@ -103,20 +104,20 @@ describe('task', _ => {
 
     it('should exec after micro in macro in browser', async () => {
       let i = ''
-      process.browser = true
+      processAny.browser = true
 
       try {
-        macro(_ => {
+        macro(() => {
           i += 'hello'
         })()
-        micro(_ => {
+        micro(() => {
           i += 'world'
-          micro(_ => {
+          micro(() => {
             i += '!'
           })()
         })()
       } finally {
-        process.browser = false
+        processAny.browser = false
       }
 
       await sleep(1)

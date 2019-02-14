@@ -1,19 +1,20 @@
 /* global describe it */
 
-import 'babel-polyfill'
 import chai from 'chai'
-import quittable from '../src/quittable'
+import quittable, { namedQuittable } from '../src/quittable'
 import sleep from '../src/sleep'
 
 chai.should()
 
-describe('quittable', _ => {
-  describe('#quittable', _ => {
+const nameFoobar = Symbol('foobar')
+
+describe('quittable', () => {
+  describe('#quittable', () => {
     it('should have right context', async () => {
-      const task = quittable(async task => {
-        task.context.time.should.be.equal(100)
-      }, null, {
+      const task = quittable({
         time: 100
+      }, async task => {
+        task.context.time.should.be.equal(100)
       })
 
       await task.run()
@@ -22,7 +23,9 @@ describe('quittable', _ => {
     it('should quit', async () => {
       let i = 0
 
-      const task = quittable(async task => {
+      const task = quittable({
+        time: 100
+      }, async task => {
         while (!task.quitted) {
           await sleep(task.context.time)
           i++
@@ -33,8 +36,6 @@ describe('quittable', _ => {
         }
 
         return i
-      }, null, {
-        time: 100
       })
 
       const ret = await task.run()
@@ -45,30 +46,30 @@ describe('quittable', _ => {
     it('should quit prev task', () => {
       let i = 0
 
-      const task1 = quittable(async task => {
+      const task1 = namedQuittable(nameFoobar, {}, async task => {
         await sleep(100)
 
         if (!task.quitted) {
           i += 2
         }
-      }, 'foobar')
+      })
 
-      const task2 = quittable(async task => {
+      const task2 = namedQuittable(nameFoobar, {}, async task => {
         await sleep(200)
 
         if (!task.quitted) {
           i += 3
         }
-      }, 'foobar')
+      })
 
-      return Promise.all([task1.run(), task2.run()]).then(_ => {
+      return Promise.all([task1.run(), task2.run()]).then(() => {
         i.should.be.equal(3)
         return Promise.resolve()
       })
     })
 
     it('should throw error', async () => {
-      const task = quittable(async task => {
+      const task = quittable({}, async task => {
         await sleep(100)
         throw new Error('xxx')
       })
@@ -85,8 +86,8 @@ describe('quittable', _ => {
       flag.should.be.equal(true)
     })
 
-    it('should NOT throw error', async () => {
-      const task = quittable(async task => {
+    it('should throw error', async () => {
+      const task = quittable({}, async task => {
         await sleep(300)
         throw new Error('xxx')
       })
@@ -94,7 +95,7 @@ describe('quittable', _ => {
       let flag = false
 
       try {
-        setTimeout(_ => {
+        setTimeout(() => {
           task.quit()
         }, 100)
 
@@ -103,7 +104,7 @@ describe('quittable', _ => {
         flag = true
       }
 
-      flag.should.be.equal(false)
+      flag.should.be.equal(true)
     })
   })
 })

@@ -1,15 +1,14 @@
 /* global describe it */
 
-import 'babel-polyfill'
 import chai from 'chai'
 import poll, { Polling } from '../src/poll'
 
 chai.should()
 
-describe('poll', _ => {
-  describe('#poll', _ => {
+describe('poll', () => {
+  describe('#poll', () => {
     it('should return a stop function', done => {
-      const stop = poll()
+      const stop = poll(() => {})
       const str = Object.prototype.toString.call(stop)
 
       str.should.be.equal('[object Function]')
@@ -24,16 +23,16 @@ describe('poll', _ => {
       }, {
         delay: 100,
         limit: 1,
-        onError: err => {
-          void err
+        onError: () => {
           i = 1
+          return false
         },
         context: {
           flag: true
         }
       })
 
-      setTimeout(_ => {
+      setTimeout(() => {
         i.should.be.equal(0)
         done()
       }, 500)
@@ -49,7 +48,7 @@ describe('poll', _ => {
         limit: 3
       })
 
-      setTimeout(_ => {
+      setTimeout(() => {
         i.should.be.equal(3)
         done()
       }, 500)
@@ -66,7 +65,7 @@ describe('poll', _ => {
         limit: 3
       })
 
-      setTimeout(_ => {
+      setTimeout(() => {
         i.should.be.equal(3)
         done()
       }, 500)
@@ -91,7 +90,7 @@ describe('poll', _ => {
         }
       })
 
-      setTimeout(_ => {
+      setTimeout(() => {
         i.should.be.equal(2)
         done()
       }, 500)
@@ -111,7 +110,7 @@ describe('poll', _ => {
         limit: 3
       })
 
-      setTimeout(_ => {
+      setTimeout(() => {
         i.should.be.equal(2)
         done()
       }, 500)
@@ -126,11 +125,11 @@ describe('poll', _ => {
         delay: 100
       })
 
-      setTimeout(_ => {
+      setTimeout(() => {
         stop()
       }, 250)
 
-      setTimeout(_ => {
+      setTimeout(() => {
         i.should.be.equal(3)
         done()
       }, 500)
@@ -139,17 +138,17 @@ describe('poll', _ => {
     it('new Polling', done => {
       let i = 0
 
-      const p = new Polling(_ => {
+      const p = new Polling(() => {
         i = 1
       }, {
         delay: 100,
         limit: 100,
-        onError: err => true
+        onError: () => true
       })
 
       p.start()
 
-      setTimeout(_ => {
+      setTimeout(() => {
         i.should.be.eq(1)
         done()
       })
@@ -158,16 +157,20 @@ describe('poll', _ => {
     it('should do nothing if stopped before start', done => {
       let i = 0
 
-      const p = new Polling(_ => {
+      const p = new Polling(() => {
         i = 1
       }, {
         delay: 100,
         limit: 100,
-        onError: err => true
+        onError: () => true
       })
 
       p.stop()
-      done()
+
+      setTimeout(() => {
+        i.should.be.eq(0)
+        done()
+      })
     })
   })
 })

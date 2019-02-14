@@ -1,45 +1,62 @@
 {
   "name": "polygala",
-  "version": "2.1.0",
-  "description": "Toolset about time & timing.",
+  "version": "3.0.0",
+  "description": "TS library about time & timing.",
   "main": "lib/index.js",
+  "jsnext:main": "src/index.ts",
+  "types": "lib",
+  "type-check": "tsc",
   "scripts": {
-    "test": "babel-node node_modules/.bin/isparta cover node_modules/.bin/_mocha",
-    "test-win": "mocha --compilers babel-core/register",
-    "es5": "./node_modules/.bin/babel ./src -d ./lib --source-maps inline",
-    "prepublish": "npm test && npm run es5"
+    "test": "nyc mocha --require ts-node/register test/*.spec.ts",
+    "coverage": "nyc report --reporter=lcov",
+    "es5": "rm -rf ./lib && tsc -p tsconfig.json",
+    "prepublishOnly": "npm run test && npm run es5",
+    "ci": "npm run test && npm run coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yusangeng/polygala.git"
+    "url": "https://github.com/yusangeng/polygala.git"
   },
-  "keywords": [
-    "asynchronous",
-    "async",
-    "task"
-  ],
+  "keywords": [],
   "author": {
     "name": "yusangeng",
     "email": "yusangeng@outlook.com"
   },
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/yusangeng/polygala/issues"
-  },
-  "homepage": "https://github.com/yusangeng/polygala#readme",
-  "dependencies": {
-    "immediate": "^3.2.3"
-  },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-plugin-transform-class-properties": "^6.24.1",
-    "babel-plugin-transform-decorators-legacy": "^1.3.4",
-    "babel-plugin-transform-react-jsx": "^6.24.1",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.6.1",
-    "chai": "^4.1.0",
-    "isparta": "^4.0.0",
-    "istanbul": "0.4.4",
-    "mocha": "^3.5.0"
+    "@types/chai": "^4.1.7",
+    "@types/dateformat": "^3.0.0",
+    "@types/lodash": "^4.14.120",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.12.19",
+    "chai": "^4.2.0",
+    "coveralls": "^3.0.2",
+    "mocha": "^5.2.0",
+    "nyc": "^13.1.0",
+    "source-map-support": "^0.5.10",
+    "ts-node": "^8.0.2",
+    "typescript": "^3.2.4"
+  },
+  "dependencies": {
+    "@types/immediate": "^3.2.0",
+    "immediate": "^3.2.3",
+    "is-generator": "^1.0.3",
+    "tslib": "^1.9.3"
+  },
+  "nyc": {
+    "extension": [
+      ".ts",
+      ".tsx"
+    ],
+    "include": [
+      "src"
+    ],
+    "exclude": [
+      "**/*.d.ts"
+    ],
+    "reporter": [
+      "html"
+    ],
+    "all": true
   }
 }

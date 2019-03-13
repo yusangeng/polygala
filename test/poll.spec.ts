@@ -1,9 +1,13 @@
 /* global describe it */
 
 import chai from 'chai'
-import poll, { Polling } from '../src/poll'
+import { poll as _poll, Polling } from '../src/poll'
 
 chai.should()
+
+const poll: typeof _poll = (fn: any, opt: any = {}) => {
+  return _poll(fn, Object.assign({}, { limit: 1 }, opt))
+}
 
 describe('poll', () => {
   describe('#poll', () => {
@@ -122,7 +126,8 @@ describe('poll', () => {
       const stop = poll(async polling => {
         i++
       }, {
-        delay: 100
+        delay: 100,
+        limit: 1000
       })
 
       setTimeout(() => {
@@ -142,7 +147,7 @@ describe('poll', () => {
         i = 1
       }, {
         delay: 100,
-        limit: 100,
+        limit: 10,
         onError: () => true
       })
 
@@ -161,7 +166,7 @@ describe('poll', () => {
         i = 1
       }, {
         delay: 100,
-        limit: 100,
+        limit: 10,
         onError: () => true
       })
 

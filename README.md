@@ -1,18 +1,18 @@
-# polygala | TS library about time & timing
+# polygala
 
 [![TypeScript](https://img.shields.io/badge/lang-typescript-blue.svg)](https://www.tslang.cn/) [![Build Status](https://travis-ci.org/yusangeng/polygala.svg?branch=master)](https://travis-ci.org/yusangeng/polygala) [![Coverage Status](https://coveralls.io/repos/github/yusangeng/polygala/badge.svg?branch=master)](https://coveralls.io/github/yusangeng/polygala?branch=master) [![Npm Package Info](https://badge.fury.io/js/polygala.svg)](https://www.npmjs.com/package/polygala) [![Downloads](https://img.shields.io/npm/dw/polygala.svg?style=flat)](https://www.npmjs.com/package/polygala)
 
-## 综述 | Abstract
+## Abstract
 
-关于时间与"时机"的工具集.
+TS library about timing.
 
-## 安装 | Install
+## Install
 
 ``` bash
 npm install polygala --save
 ```
 
-## 使用 | Usage
+## Usage
 
 ### sleep
 

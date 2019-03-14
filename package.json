@@ -1,7 +1,7 @@
 {
   "name": "polygala",
   "version": "3.0.1",
-  "description": "TS library about time & timing.",
+  "description": "TS library about timing.",
   "main": "lib/index.js",
   "jsnext:main": "src/index.ts",
   "types": "lib",
@@ -17,7 +17,9 @@
     "type": "git",
     "url": "https://github.com/yusangeng/polygala.git"
   },
-  "keywords": [],
+  "keywords": [
+    "time", "timing", "async", "typescript"
+  ],
   "author": {
     "name": "yusangeng",
     "email": "yusangeng@outlook.com"

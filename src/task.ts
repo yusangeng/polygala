@@ -10,9 +10,9 @@ type FProcedure = (...args: any[]) => void
 
 let microTaskCount = 0
 
-export function microTask<Fn extends FProcedure> (fn: Fn) : Fn {
+export function microTask<Fn extends FProcedure>(fn: Fn): Fn {
   const retFn = (...args: any[]) => {
-      immediate(() => {
+    immediate(() => {
       ++microTaskCount
 
       try {
@@ -21,14 +21,14 @@ export function microTask<Fn extends FProcedure> (fn: Fn) : Fn {
         --microTaskCount
       }
     })
-  } 
-  
+  }
+
   return retFn as Fn
 }
 
-export function macroTask<Fn extends FProcedure> (fn: Fn) : Fn {
+export function macroTask<Fn extends FProcedure>(fn: Fn): Fn {
   const retFn = (...args: any[]) => {
-    setTimeout(_ => {
+    setTimeout(() => {
       if (!microTaskCount) {
         // immediate有可能是setTimeout模拟的
         // 所以要先检查有没有还没完成的immediate调用

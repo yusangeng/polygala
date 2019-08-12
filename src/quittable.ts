@@ -6,10 +6,12 @@
 
 // import { isGeneratorFn } from 'is-generator'
 
+const noop = () => {}
+
 export interface IQuittable<ContextType> {
   quitted: boolean
   readonly context: ContextType
-  quit () : void
+  quit(): void
 }
 
 export type QuittableFunc<ContextType, RetType> = (q: IQuittable<ContextType>) => RetType
@@ -28,6 +30,8 @@ const namedQuittableMap: any = {}
 export type FQUITTED = () => void
 export const QUITTED: FQUITTED = () => {}
 
+export type FQuitHandler = () => void
+
 export class Quittable<ContextType, RetType> implements IQuittable<ContextType> {
   public quitted: boolean = false
   public readonly context: ContextType
@@ -35,8 +39,9 @@ export class Quittable<ContextType, RetType> implements IQuittable<ContextType> 
   private readonly name: symbol | null
   private readonly fn: QuittableCallable<ContextType, RetType>
   private used: boolean = false
+  private handleQuit: FQuitHandler = noop
 
-  constructor (fn: QuittableCallable<ContextType, RetType>, options: QuittableOptions<ContextType>) {
+  constructor(fn: QuittableCallable<ContextType, RetType>, options: QuittableOptions<ContextType>) {
     const opt = assign({ context: {}, name: null }, options || {})
     const { context, name } = opt
 
@@ -45,11 +50,16 @@ export class Quittable<ContextType, RetType> implements IQuittable<ContextType> 
     this.name = name
   }
 
-  quit () : void {
+  quit(): void {
     this.quitted = true
+    this.handleQuit()
   }
 
-  async run () : Promise<FQUITTED | RetType> {
+  setQuitCallback(fn: FQuitHandler): void {
+    this.handleQuit = fn
+  }
+
+  async run(): Promise<FQUITTED | RetType> {
     if (this.used) {
       throw new Error(`Quittable object should NOT be executed repeatly.`)
     }
@@ -71,7 +81,7 @@ export class Quittable<ContextType, RetType> implements IQuittable<ContextType> 
     return ret
   }
 
-  private _beforeRun () : void {
+  private _beforeRun(): void {
     this.used = true
     const { name } = this
 
@@ -81,7 +91,7 @@ export class Quittable<ContextType, RetType> implements IQuittable<ContextType> 
     }
   }
 
-  private _afterRun () : void {
+  private _afterRun(): void {
     const { name } = this
 
     if (!name) {
@@ -93,7 +103,7 @@ export class Quittable<ContextType, RetType> implements IQuittable<ContextType> 
     }
   }
 
-  private _quitPrev () : void {
+  private _quitPrev(): void {
     const { name } = this
 
     if (!name) {
@@ -109,19 +119,21 @@ export class Quittable<ContextType, RetType> implements IQuittable<ContextType> 
   }
 }
 
-export function quittable<ContextType, RetType = void> (
+export function quittable<ContextType, RetType = void>(
   context: ContextType,
-  fn: QuittableCallable<ContextType, RetType>) : Quittable<ContextType, RetType> {
+  fn: QuittableCallable<ContextType, RetType>
+): Quittable<ContextType, RetType> {
   return new Quittable<ContextType, RetType>(fn, {
     name: null,
     context
   })
 }
 
-export function namedQuittable<ContextType, RetType = void> (
+export function namedQuittable<ContextType, RetType = void>(
   name: symbol,
   context: ContextType,
-  fn: QuittableCallable<ContextType, RetType>) : Quittable<ContextType, RetType> {
+  fn: QuittableCallable<ContextType, RetType>
+): Quittable<ContextType, RetType> {
   return new Quittable<ContextType, RetType>(fn, {
     name,
     context

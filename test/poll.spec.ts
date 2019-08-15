@@ -1,5 +1,6 @@
 /* global describe it */
 
+import sleep from 'sleep-promise'
 import chai from 'chai'
 import { poll as _poll, Polling } from '../src/poll'
 
@@ -12,7 +13,7 @@ const poll: typeof _poll = (fn: any, opt: any = {}) => {
 describe('poll', () => {
   describe('#poll', () => {
     it('should return a stop function', done => {
-      const stop = poll(() => {})
+      const stop = poll(async () => {})
       const str = Object.prototype.toString.call(stop)
 
       str.should.be.equal('[object Function]')
@@ -22,19 +23,22 @@ describe('poll', () => {
     it('should have right context', done => {
       let i = 0
 
-      poll(async polling => {
-        polling.context.flag.should.be.equal(true)
-      }, {
-        delay: 100,
-        limit: 1,
-        onError: () => {
-          i = 1
-          return false
+      poll(
+        async polling => {
+          polling.context.flag.should.be.equal(true)
         },
-        context: {
-          flag: true
+        {
+          delay: 100,
+          limit: 1,
+          onError: () => {
+            i = 1
+            return false
+          },
+          context: {
+            flag: true
+          }
         }
-      })
+      )
 
       setTimeout(() => {
         i.should.be.equal(0)
@@ -45,12 +49,15 @@ describe('poll', () => {
     it('should poll 3 times', done => {
       let i = 0
 
-      poll(async polling => {
-        i++
-      }, {
-        delay: 100,
-        limit: 3
-      })
+      poll(
+        async polling => {
+          i++
+        },
+        {
+          delay: 100,
+          limit: 3
+        }
+      )
 
       setTimeout(() => {
         i.should.be.equal(3)
@@ -61,13 +68,16 @@ describe('poll', () => {
     it('should poll 3 times with error', done => {
       let i = 0
 
-      poll(async polling => {
-        i++
-        throw new Error('')
-      }, {
-        delay: 100,
-        limit: 3
-      })
+      poll(
+        async polling => {
+          i++
+          throw new Error('')
+        },
+        {
+          delay: 100,
+          limit: 3
+        }
+      )
 
       setTimeout(() => {
         i.should.be.equal(3)
@@ -78,21 +88,24 @@ describe('poll', () => {
     it('should stop on error', done => {
       let i = 0
 
-      poll(async polling => {
-        i++
+      poll(
+        async polling => {
+          i++
 
-        if (i === 2) {
-          throw new Error('xxx')
+          if (i === 2) {
+            throw new Error('xxx')
+          }
+        },
+        {
+          delay: 100,
+          limit: 3,
+          onError: err => {
+            void err
+            // console.log(err.message)
+            return true
+          }
         }
-      }, {
-        delay: 100,
-        limit: 3,
-        onError: err => {
-          void err
-          // console.log(err.message)
-          return true
-        }
-      })
+      )
 
       setTimeout(() => {
         i.should.be.equal(2)
@@ -103,16 +116,19 @@ describe('poll', () => {
     it('should stop when polling.stop was called', done => {
       let i = 0
 
-      poll(async polling => {
-        i++
+      poll(
+        async polling => {
+          i++
 
-        if (i === 2) {
-          polling.stop()
+          if (i === 2) {
+            polling.stop()
+          }
+        },
+        {
+          delay: 100,
+          limit: 3
         }
-      }, {
-        delay: 100,
-        limit: 3
-      })
+      )
 
       setTimeout(() => {
         i.should.be.equal(2)
@@ -123,12 +139,15 @@ describe('poll', () => {
     it('should stop', done => {
       let i = 0
 
-      const stop = poll(async polling => {
-        i++
-      }, {
-        delay: 100,
-        limit: 1000
-      })
+      const stop = poll(
+        async polling => {
+          i++
+        },
+        {
+          delay: 100,
+          limit: 1000
+        }
+      )
 
       setTimeout(() => {
         stop()
@@ -143,13 +162,16 @@ describe('poll', () => {
     it('new Polling', done => {
       let i = 0
 
-      const p = new Polling(() => {
-        i = 1
-      }, {
-        delay: 100,
-        limit: 10,
-        onError: () => true
-      })
+      const p = new Polling(
+        () => {
+          i = 1
+        },
+        {
+          delay: 100,
+          limit: 10,
+          onError: () => true
+        }
+      )
 
       p.start()
 
@@ -162,13 +184,16 @@ describe('poll', () => {
     it('should do nothing if stopped before start', done => {
       let i = 0
 
-      const p = new Polling(() => {
-        i = 1
-      }, {
-        delay: 100,
-        limit: 10,
-        onError: () => true
-      })
+      const p = new Polling(
+        () => {
+          i = 1
+        },
+        {
+          delay: 100,
+          limit: 10,
+          onError: () => true
+        }
+      )
 
       p.stop()
 

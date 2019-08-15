@@ -4,34 +4,37 @@
  * @author Y3G
  */
 
-export type PollingFunc<ContextType> = (p: Polling<ContextType>) => void
-export type ErrorCallback = (error: Error) => boolean
+export type FPolling<ContextType> = (p: Polling<ContextType>) => any
+export type FErrorCallback = (error: Error) => boolean
+export type FStopCallback = () => void
 
 export type PollingOptions<ContextType> = {
   context?: ContextType
   delay?: number
   limit?: number
-  onError?: ErrorCallback
+  onError?: FErrorCallback
+  onStop?: FStopCallback
 }
 
-function goon (error: Error) {
-  return false
-}
+const goon = (error: Error) => false
+const noop = () => {}
 
 const getDefaultPollingOptions = () => {
   return {
     context: {},
     delay: 1000,
     limit: 0,
-    onError: goon
+    onError: goon,
+    onStop: noop
   }
 }
 
 export class Polling<ContextType> {
-  private fn: PollingFunc<ContextType>
+  private fn: FPolling<ContextType>
   private delay: number
   private limit: number
-  private onError: ErrorCallback
+  private onError: FErrorCallback
+  private onStop: FStopCallback
 
   private count: number = 0
   private timer: any = null
@@ -40,7 +43,7 @@ export class Polling<ContextType> {
   started: boolean = false
   stopped: boolean = false
 
-  get finished () : boolean {
+  get finished(): boolean {
     if (this.limit <= 0) {
       return false
     }
@@ -48,19 +51,19 @@ export class Polling<ContextType> {
     return this.limit === this.count
   }
 
-  constructor (fn: PollingFunc<ContextType>,
-    options: PollingOptions<ContextType> = {}) {
+  constructor(fn: FPolling<ContextType>, options: PollingOptions<ContextType> = {}) {
     const opt = Object.assign(getDefaultPollingOptions(), options)
+    const { context, delay, limit, onError, onStop } = opt
 
-    this.context = opt.context
-    this.delay = opt.delay
-    this.limit = opt.limit
-    this.onError = opt.onError
-
+    this.context = context
+    this.delay = delay
+    this.limit = limit
+    this.onError = onError
+    this.onStop = onStop
     this.fn = fn
   }
 
-  async start () {
+  async start() {
     if (this.started) {
       throw new Error(`Polling should ONLY be started once.`)
     }
@@ -70,16 +73,20 @@ export class Polling<ContextType> {
     this._onTimeout()
   }
 
-  stop () {
+  stop() {
     this.stopped = true
 
     if (this.timer) {
       clearTimeout(this.timer)
       this.timer = null
+
+      if (this.onStop) {
+        this.onStop()
+      }
     }
   }
 
-  private _nextTimer () {
+  private _nextTimer() {
     if (this.stopped || this.finished) {
       return
     }
@@ -87,7 +94,7 @@ export class Polling<ContextType> {
     this.timer = setTimeout(this._onTimeout.bind(this), this.delay)
   }
 
-  private async _onTimeout () {
+  private async _onTimeout() {
     if (this.stopped) {
       return
     }
@@ -106,13 +113,72 @@ export class Polling<ContextType> {
   }
 }
 
-export type StopFunc = () => void
+export type FStop = () => void
+export type FCompare<ValueType> = (curr: ValueType, prev: ValueType) => boolean
+export type FUntil<ValueType> = (compare: FCompare<ValueType>, timeout?: number) => Promise<ValueType>
 
-export function poll<ContextType> (fn: PollingFunc<ContextType>,
-  options: PollingOptions<ContextType> = {}) : StopFunc {
-  const polling = new Polling(fn, options)
+export type PollRetType<ValueType> = {
+  (): void
+  polling: {
+    stop: FStop
+  }
+  until: FUntil<ValueType>
+}
+
+export function poll<ContextType, RetType>(
+  fn: FPolling<ContextType>,
+  options: PollingOptions<ContextType> = {}
+): PollRetType<RetType> {
+  var pollingContext: any = {
+    lastRet: void 0,
+    until: null,
+    onStop: null
+  }
+
+  const polling = new Polling(
+    async (p: Polling<ContextType>) => {
+      const ret = await fn(p as any)
+      const { lastRet, until } = pollingContext
+
+      if (until) {
+        pollingContext.lastRet = ret
+
+        if (until(ret, lastRet)) {
+          polling.stop()
+        }
+      }
+    },
+    {
+      ...options,
+      onStop: () => {
+        const { onStop: onStopOfPollingContext, lastRet } = pollingContext
+        const { onStop: onStopOfOptions } = options
+
+        if (onStopOfPollingContext) onStopOfPollingContext(lastRet)
+        if (onStopOfOptions) onStopOfOptions()
+      }
+    }
+  )
+
   polling.start()
-  return () => polling.stop()
+
+  const retFn: any = () => {
+    polling.stop()
+  }
+
+  retFn.polling = polling
+  retFn.until = (fn: FCompare<RetType>, timeout: number = 0) => {
+    return new Promise((resolve, reject) => {
+      if (timeout > 0) {
+        setTimeout(() => reject(new Error('Time out.')))
+      }
+
+      pollingContext.until = fn
+      pollingContext.onStop = (value: RetType) => resolve(value)
+    })
+  }
+
+  return retFn as PollRetType<RetType>
 }
 
 // 兼容老版本

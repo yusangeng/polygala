@@ -8,7 +8,7 @@ TS library about timing.
 
 ## Install
 
-``` bash
+```bash
 npm install polygala --save
 ```
 
@@ -18,10 +18,10 @@ npm install polygala --save
 
 Asynchronous sleep.
 
-``` ts
+```ts
 import { sleep } from 'polygala'
 
-async function main () : Promise<void> {
+async function main(): Promise<void> {
   await sleep(1000)
 }
 ```
@@ -30,7 +30,7 @@ async function main () : Promise<void> {
 
 Simulative micro/macro task in browser.
 
-``` ts
+```ts
 import { micro, macro } from 'polygala'
 
 const task1 = macro(() => console.log('task1'))
@@ -46,15 +46,15 @@ task2()
 
 FIFO promise queue.
 
-``` ts
+```ts
 import { fifo, sleep } from 'polygala'
 
-async function fa() : Promise<void> {
+async function fa(): Promise<void> {
   // 2s delay
   await sleep(2000)
 }
 
-async function fb() : Promise<void> {
+async function fb(): Promise<void> {
   // 1s delay
   await sleep(1000)
 }
@@ -66,8 +66,12 @@ const b = fifo(fb, globalFIFOName)
 
 let str = ''
 
-a().then(() => { str += 'Hello' })
-b().then(() => { str += 'World' })
+a().then(() => {
+  str += 'Hello'
+})
+b().then(() => {
+  str += 'World'
+})
 
 //=> str === 'Hello World'
 ```
@@ -76,61 +80,82 @@ b().then(() => { str += 'World' })
 
 An easy-to-use polling implemention.
 
-``` ts
+```ts
 import { poll } from 'polygala'
 
-const stop = poll(async polling => {
-  const { url } = polling.context
-  await fetch(url)
-}, {
-  delay: 3000,
-  limit: 1000, // Repeats at most 1000 times, 0 means NO limit.
-  context: {
-    url: '//foobar.com/heartbeat'
+const stop = poll(
+  async polling => {
+    const { url } = polling.context
+    await fetch(url)
   },
-  onError: err => {
-    console.error(err)
-    return false // False means "Don't stop polling", if you want to stop, return true.
+  {
+    delay: 3000,
+    limit: 1000, // Repeats at most 1000 times, 0 means NO limit.
+    context: {
+      url: '//foobar.com/heartbeat'
+    },
+    onError: err => {
+      console.error(err)
+      return false // False means "Don't stop polling", if you want to stop, return true.
+    }
   }
-})
+)
 
 // ...
 
 stop() // stop polling.
 ```
 
+### poll/until
+
+Poll until compare function returns true.
+
+```ts
+import { poll } from 'polygala'
+
+let i = 0
+
+try {
+  const data = await poll(async () => i++).until((curr: any) => curr > 100, 1000)
+} catch (err) {
+  console.log(err.message)
+}
+```
+
 ### quittable
 
 Quittable asynchronous task.
 
-``` ts
+```ts
 import { quittable, sleep } from 'polygala'
 import ajax from './ajax'
 import store from './store'
 
-const task = quittable(async task => {
-  await sleep(1000)
+const task = quittable(
+  async task => {
+    await sleep(1000)
 
-  if (task.quitted) {
-    // Task has been quitted.
-    return
+    if (task.quitted) {
+      // Task has been quitted.
+      return
+    }
+
+    const { url } = task.context
+    const data = await ajax.get(url)
+
+    if (task.quitted) {
+      return
+    }
+
+    store.data = data
+  },
+  // Name of quittable task, null means on name. A named task would be quitted if a new task with the same name was run.
+  'foobar',
+  // context
+  {
+    url: '//foobar.com/heartbeat'
   }
-
-  const { url } = task.context
-  const data = await ajax.get(url)
-
-  if (task.quitted) {
-    return
-  }
-
-  store.data = data
-},
-// Name of quittable task, null means on name. A named task would be quitted if a new task with the same name was run.
-'foobar',
-// context
-{
-  url: '//foobar.com/heartbeat'
-})
+)
 
 task.run()
 
@@ -145,37 +170,37 @@ setTimeout(_ => {
 
 Sleep Asynchronously.
 
-``` ts
-function sleep (milliseconds: number) : Promise<void>
+```ts
+function sleep(milliseconds: number): Promise<void>
 ```
 
 ### micro & macro
 
 Invoke simulative micro/macro tasks in browser.
 
-``` ts
+```ts
 type FProcedure = (...args: any[]) => void
 
-function micro<Fn extends FProcedure> (fn: Fn) : Fn
-function macro<Fn extends FProcedure> (fn: Fn) : Fn
+function micro<Fn extends FProcedure>(fn: Fn): Fn
+function macro<Fn extends FProcedure>(fn: Fn): Fn
 ```
 
 ### fifo
 
 Push an async function and its return value into a FIFO promise queue.
 
-``` ts
+```ts
 type AsyncFunc<RetType> = (...args: any[]) => Promise<RetType>
 
-export function fifo<Fn extends AsyncFunc<void>> (fn : Fn, queueName?: symbol) : Fn
-export function fifo<RetType, Fn extends AsyncFunc<RetType>> (fn : Fn, queueName?: symbol) : Fn
+export function fifo<Fn extends AsyncFunc<void>>(fn: Fn, queueName?: symbol): Fn
+export function fifo<RetType, Fn extends AsyncFunc<RetType>>(fn: Fn, queueName?: symbol): Fn
 ```
 
 ### pool
 
-Start polling. 
+Start polling.
 
-``` ts
+```ts
 // Polling function type.
 type PollingFunc<ContextType> = (p: Polling<ContextType>) => void
 
@@ -193,18 +218,18 @@ type PollingOptions<ContextType> = {
 // Function to stop polling.
 type StopFunc = () => void
 
-function poll<ContextType> (fn: PollingFunc<ContextType>, options?: PollingOptions<ContextType>) : StopFunc
+function poll<ContextType>(fn: PollingFunc<ContextType>, options?: PollingOptions<ContextType>): StopFunc
 ```
 
 ### quittable
 
 Create a quittable asynchronous task.
 
-``` ts
+```ts
 interface IQuittable<ContextType> {
   quitted: boolean
   readonly context: ContextType
-  quit () : void
+  quit(): void
 }
 
 type FQUITTED = () => void
@@ -212,16 +237,16 @@ type FQUITTED = () => void
 class Quittable<ContextType, RetType> implements IQuittable<ContextType> {
   // ...
 
-  run () : Promise<FQUITTED | RetType>
-  quit () : void
+  run(): Promise<FQUITTED | RetType>
+  quit(): void
 }
 
 type QuittableCallable<ContextType, RetType> = (q: IQuittable<ContextType>) => RetType
 
-function quittable<ContextType, RetType = void> (
+function quittable<ContextType, RetType = void>(
   context: ContextType,
-  fn: QuittableCallable<ContextType, RetType>) : Quittable<ContextType, RetType>
-
+  fn: QuittableCallable<ContextType, RetType>
+): Quittable<ContextType, RetType>
 ```
 
 ### namedQuittable
@@ -230,9 +255,10 @@ Create a named quittable asynchronous task.
 
 If you've created a named quittable task, the last task with the same name was quitted automatically.
 
-``` ts
-function namedQuittable<ContextType, RetType = void> (
+```ts
+function namedQuittable<ContextType, RetType = void>(
   name: symbol,
   context: ContextType,
-  fn: QuittableCallable<ContextType, RetType>) : Quittable<ContextType, RetType>
+  fn: QuittableCallable<ContextType, RetType>
+): Quittable<ContextType, RetType>
 ```

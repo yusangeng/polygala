@@ -196,7 +196,7 @@ export function fifo<Fn extends AsyncFunc<void>>(fn: Fn, queueName?: symbol): Fn
 export function fifo<RetType, Fn extends AsyncFunc<RetType>>(fn: Fn, queueName?: symbol): Fn
 ```
 
-### pool
+### poll
 
 Start polling.
 

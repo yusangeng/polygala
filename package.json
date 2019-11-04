@@ -45,7 +45,6 @@
   "dependencies": {
     "@types/immediate": "^3.2.0",
     "immediate": "^3.2.3",
-    "is-generator": "^1.0.3",
     "tslib": "^1.9.3"
   },
   "nyc": {

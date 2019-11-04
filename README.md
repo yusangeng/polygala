@@ -149,7 +149,8 @@ const task = quittable(
 
     store.data = data
   },
-  // Name of quittable task, null means on name. A named task would be quitted if a new task with the same name was run.
+  // Name of quittable task, null means on name.
+  // A named task would be quitted if a new task with the same name was run.
   'foobar',
   // context
   {
@@ -261,4 +262,18 @@ function namedQuittable<ContextType, RetType = void>(
   context: ContextType,
   fn: QuittableCallable<ContextType, RetType>
 ): Quittable<ContextType, RetType>
+```
+
+### countdown
+
+```ts
+export type CountDownOptions = {
+  // Countdown interval, the default value is 1000ms.
+  interval?: number
+  total: number
+  onTimeout?: (total: number, countdown: CountDown) => void
+  onTick?: (residue: number, total: number, countdown: CountDown) => void
+}
+
+export function countdown(options: CountDownOptions)
 ```

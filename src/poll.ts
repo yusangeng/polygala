@@ -4,6 +4,8 @@
  * @author Y3G
  */
 
+import { noop, goon } from './utils'
+
 export type FPolling<ContextType> = (p: Polling<ContextType>) => any
 export type FErrorCallback = (error: Error) => boolean
 export type FStopCallback = () => void
@@ -15,9 +17,6 @@ export type PollingOptions<ContextType> = {
   onError?: FErrorCallback
   onStop?: FStopCallback
 }
-
-const goon = (error: Error) => false
-const noop = () => {}
 
 const getDefaultPollingOptions = () => {
   return {
@@ -33,8 +32,8 @@ export class Polling<ContextType> {
   private fn: FPolling<ContextType>
   private delay: number
   private limit: number
-  private onError: FErrorCallback
-  private onStop: FStopCallback
+  private handleError: FErrorCallback
+  private handleStop: FStopCallback
 
   private count: number = 0
   private timer: any = null
@@ -58,8 +57,8 @@ export class Polling<ContextType> {
     this.context = context
     this.delay = delay
     this.limit = limit
-    this.onError = onError
-    this.onStop = onStop
+    this.handleError = onError
+    this.handleStop = onStop
     this.fn = fn
   }
 
@@ -80,8 +79,8 @@ export class Polling<ContextType> {
       clearTimeout(this.timer)
       this.timer = null
 
-      if (this.onStop) {
-        this.onStop()
+      if (this.handleStop) {
+        this.handleStop()
       }
     }
   }
@@ -103,7 +102,7 @@ export class Polling<ContextType> {
       this.count++
       await this.fn(this)
     } catch (err) {
-      const shouldStop = this.onError(err)
+      const shouldStop = this.handleError(err)
       if (shouldStop) {
         this.stop()
       }
@@ -137,7 +136,7 @@ export function poll<ContextType, RetType>(
 
   const polling = new Polling(
     async (p: Polling<ContextType>) => {
-      const ret = await fn(p as any)
+      const ret = await fn(p)
       const { lastRet, until } = pollingContext
 
       if (until) {
@@ -167,7 +166,7 @@ export function poll<ContextType, RetType>(
   }
 
   retFn.polling = polling
-  retFn.until = (fn: FCompare<RetType>, timeout: number = 0) => {
+  retFn.until = (fn: FCompare<RetType> = () => false, timeout: number = 0) => {
     return new Promise((resolve, reject) => {
       if (timeout > 0) {
         setTimeout(() => reject(new Error('Time out.')))

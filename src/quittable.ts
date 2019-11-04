@@ -4,9 +4,7 @@
  * @author Y3G
  */
 
-// import { isGeneratorFn } from 'is-generator'
-
-const noop = () => {}
+import { noop } from './utils'
 
 export interface IQuittable<ContextType> {
   quitted: boolean
@@ -15,7 +13,6 @@ export interface IQuittable<ContextType> {
 }
 
 export type QuittableFunc<ContextType, RetType> = (q: IQuittable<ContextType>) => RetType
-// type QuittableGeneratorFunc<ContextType, RetType> = (q: IQuittable<ContextType>) => IterableIterator<RetType>
 
 export type QuittableCallable<ContextType, RetType> = QuittableFunc<ContextType, RetType>
 

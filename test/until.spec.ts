@@ -5,8 +5,8 @@ import { poll } from '../src/poll'
 
 chai.should()
 
-describe('poll', () => {
-  describe('#util', () => {
+describe('poll/until', () => {
+  describe('#until', () => {
     it('should return a right value', done => {
       let i = 0
 

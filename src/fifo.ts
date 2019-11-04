@@ -4,13 +4,15 @@
  * @author Y3G
  */
 
+import { noop } from './utils'
+
 enum FIFOStatus {
   PENDING,
   WAITTING
 }
 
-export type Func = (...args: any[]) => any
-export type AsyncFunc<RetType> = (...args: any[]) => Promise<RetType>
+type Func = (...args: any[]) => any
+type AsyncFunc<RetType> = (...args: any[]) => Promise<RetType>
 
 type QueueItem = {
   id: number
@@ -18,17 +20,15 @@ type QueueItem = {
   callback: () => void
 }
 
-const noop = () => {}
-
 class FIFO {
   private queue: Array<QueueItem> = []
   private currId: number = 0
 
-  transform<RetType, Fn extends AsyncFunc<RetType>> (fn: Fn) : Fn {
+  transform<RetType, Fn extends AsyncFunc<RetType>>(fn: Fn): Fn {
     const self = this
     const id = this.currId++
 
-    const retFn = function retFn (this: any, ...args: any[]) {
+    const retFn = function retFn(this: any, ...args: any[]) {
       const runtimeThis: any = this
 
       return new Promise(async (resolve, reject) => {
@@ -50,7 +50,7 @@ class FIFO {
     return retFn as Fn
   }
 
-  private _handleResult (id: number, callback: Func) : void {
+  private _handleResult(id: number, callback: Func): void {
     const { queue } = this
     const item = queue.find(el => el.id === id)
 
@@ -60,7 +60,7 @@ class FIFO {
     this._checkWaitingItems()
   }
 
-  private _checkWaitingItems () : void {
+  private _checkWaitingItems(): void {
     const { queue } = this
 
     while (queue.length) {
@@ -80,11 +80,11 @@ class FIFO {
 const fifos: any = {}
 const defaultName = Symbol('__DEFAULT_FIFO__')
 
-export function fifo<Fn extends AsyncFunc<void>> (fn : Fn, queueName?: symbol) : Fn
-export function fifo<RetType, Fn extends AsyncFunc<RetType>> (fn : Fn, queueName?: symbol) : Fn
+export function fifo<Fn extends AsyncFunc<void>>(fn: Fn, queueName?: symbol): Fn
+export function fifo<RetType, Fn extends AsyncFunc<RetType>>(fn: Fn, queueName?: symbol): Fn
 
 export function fifo(fn: any, queueName = defaultName) {
-  let fifo = fifos[queueName]
+  let fifo = fifos[queueName] as FIFO
 
   if (!fifo) {
     fifo = fifos[queueName] = new FIFO()

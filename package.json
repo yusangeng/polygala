@@ -1,6 +1,6 @@
 {
   "name": "polygala",
-  "version": "3.0.4",
+  "version": "3.1.0",
   "description": "TS library about timing.",
   "main": "lib/index.js",
   "jsnext:main": "src/index.ts",

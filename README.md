@@ -19,10 +19,10 @@ npm install polygala --save
 Asynchronous sleep.
 
 ```ts
-import { sleep } from 'polygala'
+import { sleep } from 'polygala';
 
 async function main(): Promise<void> {
-  await sleep(1000)
+  await sleep(1000);
 }
 ```
 
@@ -31,13 +31,13 @@ async function main(): Promise<void> {
 Simulative micro/macro task in browser.
 
 ```ts
-import { micro, macro } from 'polygala'
+import { micro, macro } from 'polygala';
 
-const task1 = macro(() => console.log('task1'))
-const task2 = micro(() => console.log('task2'))
+const task1 = macro(() => console.log('task1'));
+const task2 = micro(() => console.log('task2'));
 
-task1()
-task2()
+task1();
+task2();
 
 //=> Prints 'task2', 'task1'
 ```
@@ -47,31 +47,31 @@ task2()
 FIFO promise queue.
 
 ```ts
-import { fifo, sleep } from 'polygala'
+import { fifo, sleep } from 'polygala';
 
 async function fa(): Promise<void> {
   // 2s delay
-  await sleep(2000)
+  await sleep(2000);
 }
 
 async function fb(): Promise<void> {
   // 1s delay
-  await sleep(1000)
+  await sleep(1000);
 }
 
-const globalFIFOName = Symbol('foobar')
+const globalFIFOName = Symbol('foobar');
 
-const a = fifo(fa, globalFIFOName)
-const b = fifo(fb, globalFIFOName)
+const a = fifo(fa, globalFIFOName);
+const b = fifo(fb, globalFIFOName);
 
-let str = ''
+let str = '';
 
 a().then(() => {
-  str += 'Hello'
-})
+  str += 'Hello';
+});
 b().then(() => {
-  str += 'World'
-})
+  str += 'World';
+});
 
 //=> str === 'Hello World'
 ```
@@ -81,29 +81,29 @@ b().then(() => {
 An easy-to-use polling implemention.
 
 ```ts
-import { poll } from 'polygala'
+import { poll } from 'polygala';
 
 const stop = poll(
-  async polling => {
-    const { url } = polling.context
-    await fetch(url)
+  async (polling) => {
+    const { url } = polling.context;
+    await fetch(url);
   },
   {
     delay: 3000,
     limit: 1000, // Repeats at most 1000 times, 0 means NO limit.
     context: {
-      url: '//foobar.com/heartbeat'
+      url: '//foobar.com/heartbeat',
     },
-    onError: err => {
-      console.error(err)
-      return false // False means "Don't stop polling", if you want to stop, return true.
-    }
+    onError: (err) => {
+      console.error(err);
+      return false; // False means "Don't stop polling", if you want to stop, return true.
+    },
   }
-)
+);
 
 // ...
 
-stop() // stop polling.
+stop(); // stop polling.
 ```
 
 ### poll/until
@@ -111,14 +111,14 @@ stop() // stop polling.
 Poll until compare function returns true.
 
 ```ts
-import { poll } from 'polygala'
+import { poll } from 'polygala';
 
-let i = 0
+let i = 0;
 
 try {
-  const data = await poll(async () => i++).until((curr: any) => curr > 100, 1000)
+  const data = await poll(async () => i++).until((curr: any) => curr > 100, 1000);
 } catch (err) {
-  console.log(err.message)
+  console.log(err.message);
 }
 ```
 
@@ -127,42 +127,42 @@ try {
 Quittable asynchronous task.
 
 ```ts
-import { quittable, sleep } from 'polygala'
-import ajax from './ajax'
-import store from './store'
+import { quittable, sleep } from 'polygala';
+import ajax from './ajax';
+import store from './store';
 
 const task = quittable(
-  async task => {
-    await sleep(1000)
+  async (task) => {
+    await sleep(1000);
 
     if (task.quitted) {
       // Task has been quitted.
-      return
+      return;
     }
 
-    const { url } = task.context
-    const data = await ajax.get(url)
+    const { url } = task.context;
+    const data = await ajax.get(url);
 
     if (task.quitted) {
-      return
+      return;
     }
 
-    store.data = data
+    store.data = data;
   },
   // Name of quittable task, null means on name.
   // A named task would be quitted if a new task with the same name was run.
   'foobar',
   // context
   {
-    url: '//foobar.com/heartbeat'
+    url: '//foobar.com/heartbeat',
   }
-)
+);
 
-task.run()
+task.run();
 
-setTimeout(_ => {
-  task.quit()
-}, 1050)
+setTimeout((_) => {
+  task.quit();
+}, 1050);
 ```
 
 ## API
@@ -172,7 +172,7 @@ setTimeout(_ => {
 Sleep Asynchronously.
 
 ```ts
-function sleep(milliseconds: number): Promise<void>
+function sleep(milliseconds: number): Promise<void>;
 ```
 
 ### micro & macro
@@ -180,10 +180,10 @@ function sleep(milliseconds: number): Promise<void>
 Invoke simulative micro/macro tasks in browser.
 
 ```ts
-type FProcedure = (...args: any[]) => void
+type FProcedure = (...args: any[]) => void;
 
-function micro<Fn extends FProcedure>(fn: Fn): Fn
-function macro<Fn extends FProcedure>(fn: Fn): Fn
+function micro<Fn extends FProcedure>(fn: Fn): Fn;
+function macro<Fn extends FProcedure>(fn: Fn): Fn;
 ```
 
 ### fifo
@@ -191,10 +191,10 @@ function macro<Fn extends FProcedure>(fn: Fn): Fn
 Push an async function and its return value into a FIFO promise queue.
 
 ```ts
-type AsyncFunc<RetType> = (...args: any[]) => Promise<RetType>
+type AsyncFunc<RetType> = (...args: any[]) => Promise<RetType>;
 
-export function fifo<Fn extends AsyncFunc<void>>(fn: Fn, queueName?: symbol): Fn
-export function fifo<RetType, Fn extends AsyncFunc<RetType>>(fn: Fn, queueName?: symbol): Fn
+export function fifo<Fn extends AsyncFunc<void>>(fn: Fn, queueName?: symbol): Fn;
+export function fifo<RetType, Fn extends AsyncFunc<RetType>>(fn: Fn, queueName?: symbol): Fn;
 ```
 
 ### poll
@@ -203,56 +203,56 @@ Start polling.
 
 ```ts
 // Polling function type.
-type PollingFunc<ContextType> = (p: Polling<ContextType>) => void
+type PollingFunc<ContextType> = (p: Polling<ContextType>) => void;
 
 // Error callbacl type.
-type ErrorCallback = (error: Error) => boolean
+type ErrorCallback = (error: Error) => boolean;
 
 // Options type.
 type PollingOptions<ContextType> = {
-  context?: ContextType
-  delay?: number
-  limit?: number
-  onError?: ErrorCallback
-}
+  context?: ContextType;
+  delay?: number;
+  limit?: number;
+  onError?: ErrorCallback;
+};
 
 // Function to stop polling.
-type StopFunc = () => void
+type StopFunc = () => void;
 
-function poll<ContextType>(fn: PollingFunc<ContextType>, options?: PollingOptions<ContextType>): StopFunc
+function poll<ContextType>(fn: PollingFunc<ContextType>, options?: PollingOptions<ContextType>): StopFunc;
 ```
 
 ### quittable
 
-Create a quittable asynchronous task.
+Create a quittable task.
 
 ```ts
 interface IQuittable<ContextType> {
-  quitted: boolean
-  readonly context: ContextType
-  quit(): void
+  quitted: boolean;
+  readonly context: ContextType;
+  quit(): void;
 }
 
-type FQUITTED = () => void
+type FQUITTED = () => void;
 
 class Quittable<ContextType, RetType> implements IQuittable<ContextType> {
   // ...
 
-  run(): Promise<FQUITTED | RetType>
-  quit(): void
+  run(): Promise<FQUITTED | RetType>;
+  quit(): void;
 }
 
-type QuittableCallable<ContextType, RetType> = (q: IQuittable<ContextType>) => RetType
+type QuittableCallable<ContextType, RetType> = (q: IQuittable<ContextType>) => RetType;
 
 function quittable<ContextType, RetType = void>(
   context: ContextType,
   fn: QuittableCallable<ContextType, RetType>
-): Quittable<ContextType, RetType>
+): Quittable<ContextType, RetType>;
 ```
 
 ### namedQuittable
 
-Create a named quittable asynchronous task.
+Create a named quittable task.
 
 If you've created a named quittable task, the last task with the same name was quitted automatically.
 
@@ -261,7 +261,15 @@ function namedQuittable<ContextType, RetType = void>(
   name: symbol,
   context: ContextType,
   fn: QuittableCallable<ContextType, RetType>
-): Quittable<ContextType, RetType>
+): Quittable<ContextType, RetType>;
+```
+
+### getRunningNamedQuittable
+
+Find the running named quittable task.
+
+```typescript
+function getRunningNamedQuittable(name: symbol);
 ```
 
 ### countdown
@@ -269,11 +277,11 @@ function namedQuittable<ContextType, RetType = void>(
 ```ts
 export type CountDownOptions = {
   // Countdown interval, the default value is 1000ms.
-  interval?: number
-  total: number
-  onTimeout?: (total: number, countdown: CountDown) => void
-  onTick?: (residue: number, total: number, countdown: CountDown) => void
-}
+  interval?: number;
+  total: number;
+  onTimeout?: (total: number, countdown: CountDown) => void;
+  onTick?: (residue: number, total: number, countdown: CountDown) => void;
+};
 
-export function countdown(options: CountDownOptions)
+export function countdown(options: CountDownOptions);
 ```
